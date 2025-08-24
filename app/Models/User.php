@@ -2,47 +2,59 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable,HasApiTokens;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    // Fillable fields for mass assignment
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'sex',
+        'profile_url',
         'email',
-        'password',
+        'phone',
+        'role',
+        'user_type',
+        'address',
+        'password'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
+    
+    protected $hidden = ['password', 'remember_token'];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    // Relationships
+
+    // A user can have multiple farms
+    public function farms()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasMany(Farm::class, 'owner_id');
+    }
+
+    // A user can have multiple vendors (if role = vendor)
+    public function vendors()
+    {
+        return $this->hasMany(Vendor::class, 'owner_id');
+    }
+
+    // A user can have multiple pre-orders
+    public function preOrders()
+    {
+        return $this->hasMany(PreOrder::class);
+    }
+
+    // A user can have multiple crop activities
+    public function cropActivities()
+    {
+        return $this->hasMany(CropActivity::class);
     }
 }
